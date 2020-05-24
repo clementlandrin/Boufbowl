@@ -54,8 +54,8 @@ FIntVector ABoufbowlGrid::GetCellIdFromLocation(FVector hit_location)
 	UE_LOG(LogTemp, Log, TEXT("Hit location : %f, %f"), hit_location.X, hit_location.Y);
 	FIntVector cell_id;
 	// hit location result is in cm
-	cell_id.X = hit_location_on_grid.X * 0.01f / m_CellSize.X - m_Width / 2;
-	cell_id.Y = hit_location_on_grid.Y * 0.01f / m_CellSize.Y - m_Length / 2;
+	cell_id.X = hit_location_on_grid.X * 0.01f / m_CellSize.X + m_Width * 0.5;
+	cell_id.Y = hit_location_on_grid.Y * 0.01f / m_CellSize.Y + m_Length * 0.5;
 	cell_id.Z = 0;
 
 	return cell_id;
