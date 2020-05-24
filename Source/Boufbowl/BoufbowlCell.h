@@ -6,15 +6,20 @@
 #include "BoufbowlCell.generated.h"
 
 UCLASS()
-class UBoufbowlCell : public UObject
+class ABoufbowlCell : public AActor
 {
 	GENERATED_BODY()
 
 public:
-	UBoufbowlCell();
+	ABoufbowlCell();
 
-	void SetId(FIntVector id);
+	void Initialize(FIntVector id, FVector2D size);
+
 private:
+	void SetId(FIntVector id);
+
+	UStaticMeshComponent* m_StaticMeshComponent;
+
 	FIntVector m_Id;
 	FVector m_Location;
 };

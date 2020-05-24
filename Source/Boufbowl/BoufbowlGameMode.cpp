@@ -23,7 +23,7 @@ void ABoufbowlGameMode::BeginPlay()
 	if (GetWorld())
 	{
 		ABoufbowlGrid* boufbowl_grid = GetWorld()->SpawnActor<ABoufbowlGrid>(FVector(0.0f, 0.0f, 0.0f), FRotator::ZeroRotator);
-		boufbowl_grid->Initialize(2, 2, FVector2D(2.0f, 2.0f));
+		boufbowl_grid->Initialize(10, 10, FVector2D(2.0f, 2.0f));
 
 		if (boufbowl_grid)
 		{

@@ -1,25 +1,12 @@
 // Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
 
 #include "BoufbowlGrid.h"
-#include "Engine/SkeletalMesh.h"
-#include "Components/StaticMeshComponent.h"
 #include "BoufbowlCell.h"
-#include "UObject/ConstructorHelpers.h"
+#include "Engine/World.h"
 
 ABoufbowlGrid::ABoufbowlGrid()
 {
 	UE_LOG(LogTemp, Log, TEXT("ABoufbowlGrid::ABoufbowlGrid"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> static_mesh(TEXT("StaticMesh'/Game/Geometry/Meshes/Plane.Plane'"));
-
-	m_StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
-	m_StaticMeshComponent->TranslucencySortPriority = -1;
-	m_StaticMeshComponent->SetupAttachment(RootComponent);
-
-	if (static_mesh.Object)
-	{
-		UE_LOG(LogTemp, Log, TEXT("ABoufbowlGrid::ABoufbowlGrid static mesh found"));
-		m_StaticMeshComponent->SetStaticMesh(static_mesh.Object);
-	}
 }
 
 void ABoufbowlGrid::Initialize(uint8 length, uint8 width, FVector2D cell_size)
@@ -27,8 +14,6 @@ void ABoufbowlGrid::Initialize(uint8 length, uint8 width, FVector2D cell_size)
 	SetDimensions(length, width);
 	SetCellSize(cell_size);
 	CreateCells();
-
-	m_StaticMeshComponent->SetRelativeScale3D(FVector(width * cell_size.X, length * cell_size.Y, 1.0f));
 }
 
 void ABoufbowlGrid::CreateCells()
@@ -37,11 +22,17 @@ void ABoufbowlGrid::CreateCells()
 	{
 		for (uint8 j = 0; j < m_Width; j++)
 		{
-			UBoufbowlCell* boufbowl_cell = NewObject<UBoufbowlCell>();
-			FIntVector id = FIntVector(i, j , 0);
-			boufbowl_cell->SetId(id);
+			if (GetWorld())
+			{
+				ABoufbowlCell* boufbowl_cell = GetWorld()->SpawnActor<ABoufbowlCell>(100.0f * FVector(m_CellSize.X * (float(i) - m_Width / 2.0f + 0.5f), m_CellSize.Y * (float(j) - m_Length / 2.0f + 0.5f), 0.0f), FRotator::ZeroRotator);
+				if (boufbowl_cell)
+				{
+					FIntVector id = FIntVector(i, j, 0);
+					boufbowl_cell->Initialize(id, m_CellSize);
 
-			m_Cells.Add(boufbowl_cell);
+					m_Cells.Add(boufbowl_cell);
+				}
+			}
 		}
 	}
 }

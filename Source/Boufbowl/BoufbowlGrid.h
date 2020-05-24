@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "BoufbowlGrid.generated.h"
 
-class UBoufbowlCell;
+class ABoufbowlCell;
 
 UCLASS()
 class ABoufbowlGrid : public AActor
@@ -19,11 +19,10 @@ public:
 
 	FIntVector GetCellIdFromLocation(FVector hit_location);
 private:
-	TArray<UBoufbowlCell*> m_Cells;
+	TArray<ABoufbowlCell*> m_Cells;
 	uint8 m_Length;
 	uint8 m_Width;
 	FVector2D m_CellSize;
-	UStaticMeshComponent* m_StaticMeshComponent;
 
 	void CreateCells();
 	void SetDimensions(uint8 length, uint8 width);
