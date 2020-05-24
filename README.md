@@ -1,2 +1,2 @@
 # Boufbowl
-Video game adaptation of Boubowl from Ankama gales
+Video game adaptation of Boubowl from Ankama games
