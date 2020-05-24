@@ -22,11 +22,11 @@ ABoufbowlCamera::ABoufbowlCamera(const FObjectInitializer& ObjectInitializer)
 
 	CameraXYLimit = 25000.f;
 	CameraHeight = 1000.f;
-	CameraHeightMin = 300.f;                // 100 for debugging
+	CameraHeightMin = 0.0f;                // 100 for debugging
 	CameraHeightMax = 5000.f;
 
 	CameraRadius = 2000.f;
-	CameraRadiusMin = 1000.f;                // 100 for debugging
+	CameraRadiusMin = 0.0f;                // 100 for debugging
 	CameraRadiusMax = 8000.f;
 
 	CameraZAnlge = 0.f;                        // yaw

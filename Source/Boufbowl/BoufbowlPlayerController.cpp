@@ -4,12 +4,12 @@
 #include "Boufbowl/BoufbowlCamera.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 #include "Runtime/Engine/Classes/Components/DecalComponent.h"
-#include "HeadMountedDisplayFunctionLibrary.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Components/DecalComponent.h"
 #include "BoufbowlPlayer.h"
 #include "Materials/Material.h"
 #include "Engine/Classes/Engine/DecalActor.h"
+#include "BoufbowlGrid.h"
 #include "Engine/World.h"
 
 ABoufbowlPlayerController::ABoufbowlPlayerController()
@@ -127,8 +127,18 @@ void ABoufbowlPlayerController::LeftMouseButtonClick()
 	{
 		UE_LOG(LogTemp, Log, TEXT("ABoufbowlPlayerController::LeftMouseButtonClick hit something"));
 
-		// We hit something, move there
 		SpawnPlayer(m_HitCursor.Location);
+
+		if (m_BoufbowlGrid)
+		{
+			FIntVector cell_id = m_BoufbowlGrid->GetCellIdFromLocation(m_HitCursor.Location);
+
+			UE_LOG(LogTemp, Log, TEXT("ABoufbowlPlayerController::LeftMouseButtonClick clicked on cell : %d, %d"), cell_id.X, cell_id.Y);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("ABoufbowlPlayerController::LeftMouseButtonClick m_BoufbowlGrid is nullptr"));
+		}
 	}
 }
 
@@ -156,14 +166,7 @@ void ABoufbowlPlayerController::SetNewMoveDestination(const FVector DestLocation
 	}
 }
 
-void ABoufbowlPlayerController::OnSetDestinationPressed()
+void ABoufbowlPlayerController::SetGrid(ABoufbowlGrid* boufbowl_grid)
 {
-	// set flag to keep updating destination until released
-	bMoveToMouseCursor = true;
-}
-
-void ABoufbowlPlayerController::OnSetDestinationReleased()
-{
-	// clear flag to indicate we should stop updating the destination
-	bMoveToMouseCursor = false;
+	m_BoufbowlGrid = boufbowl_grid;
 }

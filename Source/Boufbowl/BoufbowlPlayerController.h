@@ -6,8 +6,10 @@
 #include "GameFramework/PlayerController.h"
 #include "BoufbowlPlayerController.generated.h"
 
+class ABoufbowlGrid;
 class ABoufbowlCamera;
 class ADecalActor;
+class UMaterial;
 
 UCLASS()
 class ABoufbowlPlayerController : public APlayerController
@@ -18,7 +20,12 @@ public:
 	ABoufbowlPlayerController();
 
 	void BeginPlay();
+
+	void SetGrid(ABoufbowlGrid* boufbowl_grid);
+
 protected:
+	ABoufbowlGrid* m_BoufbowlGrid;
+
 	void InitializeDecal();
 
 	FHitResult m_HitCursor;
@@ -31,9 +38,6 @@ protected:
 
 	/** Stands for decal material */
 	UMaterial* m_DecalMaterial;
-
-	/** True if the controlled character should navigate to the mouse cursor. */
-	uint32 bMoveToMouseCursor : 1;
 
 	// Begin PlayerController interface
 	virtual void PlayerTick(float DeltaTime) override;

@@ -13,6 +13,8 @@ class ABoufbowlGameMode : public AGameModeBase
 
 public:
 	ABoufbowlGameMode();
+
+	void BeginPlay();
 };
 
 

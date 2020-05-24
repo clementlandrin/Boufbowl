@@ -86,7 +86,7 @@ public:
 
 	/** Camera Scroll Boundary */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
-		float CameraScrollBoundary = 0.0f;
+		float CameraScrollBoundary;
 
 	/** Should the camera move? */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
