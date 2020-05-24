@@ -9,18 +9,16 @@
 ABoufbowlGrid::ABoufbowlGrid()
 {
 	UE_LOG(LogTemp, Log, TEXT("ABoufbowlGrid::ABoufbowlGrid"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> static_mesh(TEXT("StaticMesh'/Game/Geometry/Meshes/TemplateFloor.TemplateFloor'"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> static_mesh(TEXT("StaticMesh'/Game/Geometry/Meshes/Plane.Plane'"));
 
-	UStaticMeshComponent* static_mesh_component = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SkeletalMesh"));
-	static_mesh_component->TranslucencySortPriority = -1;
-	static_mesh_component->SetupAttachment(RootComponent);
+	m_StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
+	m_StaticMeshComponent->TranslucencySortPriority = -1;
+	m_StaticMeshComponent->SetupAttachment(RootComponent);
 
 	if (static_mesh.Object)
 	{
 		UE_LOG(LogTemp, Log, TEXT("ABoufbowlGrid::ABoufbowlGrid static mesh found"));
-		static_mesh_component->SetStaticMesh(static_mesh.Object);
-		FVector box = static_mesh_component->CalcBounds(static_mesh_component->GetComponentTransform()).BoxExtent;
-		static_mesh_component->AddRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
+		m_StaticMeshComponent->SetStaticMesh(static_mesh.Object);
 	}
 }
 
@@ -29,6 +27,8 @@ void ABoufbowlGrid::Initialize(uint8 length, uint8 width, FVector2D cell_size)
 	SetDimensions(length, width);
 	SetCellSize(cell_size);
 	CreateCells();
+
+	m_StaticMeshComponent->SetRelativeScale3D(FVector(width * cell_size.X, length * cell_size.Y, 1.0f));
 }
 
 void ABoufbowlGrid::CreateCells()
@@ -60,10 +60,11 @@ void ABoufbowlGrid::SetCellSize(FVector2D cell_size)
 FIntVector ABoufbowlGrid::GetCellIdFromLocation(FVector hit_location)
 {
 	FVector2D hit_location_on_grid = FVector2D(hit_location.X, hit_location.Y);
-
+	UE_LOG(LogTemp, Log, TEXT("Hit location : %f, %f"), hit_location.X, hit_location.Y);
 	FIntVector cell_id;
-	cell_id.X = hit_location_on_grid.X / m_CellSize.X - m_Width / 2;
-	cell_id.Y = hit_location_on_grid.Y / m_CellSize.Y - m_Length / 2;
+	// hit location result is in cm
+	cell_id.X = hit_location_on_grid.X * 0.01f / m_CellSize.X - m_Width / 2;
+	cell_id.Y = hit_location_on_grid.Y * 0.01f / m_CellSize.Y - m_Length / 2;
 	cell_id.Z = 0;
 
 	return cell_id;

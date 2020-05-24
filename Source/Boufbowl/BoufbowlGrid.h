@@ -23,6 +23,7 @@ private:
 	uint8 m_Length;
 	uint8 m_Width;
 	FVector2D m_CellSize;
+	UStaticMeshComponent* m_StaticMeshComponent;
 
 	void CreateCells();
 	void SetDimensions(uint8 length, uint8 width);

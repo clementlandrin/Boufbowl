@@ -14,8 +14,8 @@
 
 ABoufbowlPlayerController::ABoufbowlPlayerController()
 {
-	bShowMouseCursor = false;
-	DefaultMouseCursor = EMouseCursor::None;
+	bShowMouseCursor = true;
+	DefaultMouseCursor = EMouseCursor::Crosshairs;
 
 	ConstructorHelpers::FObjectFinder<UMaterial> DecalMaterialAsset(TEXT("Material'/Game/TopDownCPP/Blueprints/M_Cursor_Decal.M_Cursor_Decal'"));
 	if (DecalMaterialAsset.Succeeded())
@@ -107,16 +107,6 @@ void ABoufbowlPlayerController::SpawnPlayer(FVector location)
 
 	ABoufbowlPlayer* spawned_player = GetWorld()->SpawnActor<ABoufbowlPlayer>(
 		ABoufbowlPlayer::StaticClass(), actual_spawn_transform, spawn_parameters);
-	
-	/*if (spawned_player)
-	{
-		spawned_player->skeletalm
-	}*/
-	/*if (GetWorld())
-	{
-		UE_LOG(LogTemp, Log, TEXT("ABoufbowlPlayerController::SpawnPlayer spawning player"));
-		GetWorld()->SpawnActor<ABoufbowlPlayer>(m_HitCursor.Location, FRotator::ZeroRotator);
-	}*/
 }
 
 void ABoufbowlPlayerController::LeftMouseButtonClick()
