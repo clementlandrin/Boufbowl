@@ -7,9 +7,12 @@
 #include "BoufbowlPlayerController.generated.h"
 
 class ABoufbowlGrid;
+class ABoufbowlCell;
 class ABoufbowlCamera;
 class ADecalActor;
+class ABoufbowlPlayer;
 class UMaterial;
+
 
 UCLASS()
 class ABoufbowlPlayerController : public APlayerController
@@ -25,6 +28,10 @@ public:
 
 protected:
 	ABoufbowlGrid* m_BoufbowlGrid;
+	ABoufbowlCell* m_SelectedCell;
+
+	void SelectCell(ABoufbowlCell* cell_to_select);
+	void DeselectCell();
 
 	void InitializeDecal();
 
@@ -38,15 +45,24 @@ protected:
 
 	/** Stands for decal material */
 	UMaterial* m_DecalMaterial;
+	/** Stands for selection material */
+	UMaterial* m_SelectionMaterial;
+	/** Stands for basic cell material */
+	UMaterial* m_BaseCellMaterial;
 
 	// Begin PlayerController interface
 	virtual void PlayerTick(float DeltaTime) override;
 	virtual void SetupInputComponent() override;
 	// End PlayerController interface
 
-	void LeftMouseButtonClick();
+	void SpawnPlayerSelectedCell();
 
-	void SpawnPlayer(FVector location);
+	void MovePlayerToCell(ABoufbowlCell* cell);
+
+	void LeftMouseButtonClick();
+	void RightMouseButtonClick();
+
+	ABoufbowlPlayer* SpawnPlayer(FVector location);
 
 	/** Navigate player to the current mouse cursor location. */
 	void MoveToMouseCursor();

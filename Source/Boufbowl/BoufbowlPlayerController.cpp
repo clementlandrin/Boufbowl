@@ -10,7 +10,12 @@
 #include "Materials/Material.h"
 #include "Engine/Classes/Engine/DecalActor.h"
 #include "BoufbowlGrid.h"
+#include "BoufbowlCell.h"
+#include "BoufbowlPlayer.h"
+#include "Components/StaticMeshComponent.h"
+#include "GameFramework/PawnMovementComponent.h"
 #include "Engine/World.h"
+#include "AIController.h"
 
 ABoufbowlPlayerController::ABoufbowlPlayerController()
 {
@@ -21,6 +26,18 @@ ABoufbowlPlayerController::ABoufbowlPlayerController()
 	if (DecalMaterialAsset.Succeeded())
 	{
 		m_DecalMaterial = DecalMaterialAsset.Object;
+	}
+
+	ConstructorHelpers::FObjectFinder<UMaterial> BaseCellMaterialAsset(TEXT("Material'/Game/Geometry/Meshes/CubeMaterial.CubeMaterial'"));
+	if (BaseCellMaterialAsset.Succeeded())
+	{
+		m_BaseCellMaterial = BaseCellMaterialAsset.Object;
+	}
+
+	ConstructorHelpers::FObjectFinder<UMaterial> SelectionMaterialAsset(TEXT("Material'/Game/Geometry/Meshes/SelectionMaterial.SelectionMaterial'"));
+	if (SelectionMaterialAsset.Succeeded())
+	{
+		m_SelectionMaterial = SelectionMaterialAsset.Object;
 	}
 
 	ConstructorHelpers::FObjectFinder<USkeletalMesh> MannequinSkeletalMesh(TEXT("SkeletalMesh'/Game/Mannequin/Character/Mesh/SK_Mannequin.SK_Mannequin'"));
@@ -79,11 +96,11 @@ void ABoufbowlPlayerController::SetupInputComponent()
 	Super::SetupInputComponent();
 
 	InputComponent->BindAction("LeftMouseButton", IE_Pressed, this, &ABoufbowlPlayerController::LeftMouseButtonClick);
-	//InputComponent->BindAction("RightMouseButton", IE_Released, this, &ABoufbowlPlayerController::RightMouseButtonClick);
+	InputComponent->BindAction("RightMouseButton", IE_Released, this, &ABoufbowlPlayerController::RightMouseButtonClick);
 	//InputComponent->BindAction("MiddleMouseButton", IE_Pressed, this, &ABoufbowlPlayerController::MiddleMouseButtonClick);
 }
 
-void ABoufbowlPlayerController::SpawnPlayer(FVector location)
+ABoufbowlPlayer* ABoufbowlPlayerController::SpawnPlayer(FVector location)
 {
 	UE_LOG(LogTemp, Log, TEXT("ABoufbowlPlayerController::SpawnPlayer"));
 
@@ -107,6 +124,41 @@ void ABoufbowlPlayerController::SpawnPlayer(FVector location)
 
 	ABoufbowlPlayer* spawned_player = GetWorld()->SpawnActor<ABoufbowlPlayer>(
 		ABoufbowlPlayer::StaticClass(), actual_spawn_transform, spawn_parameters);
+
+	return spawned_player;
+}
+
+void ABoufbowlPlayerController::SpawnPlayerSelectedCell()
+{
+	if (!m_SelectedCell->GetBoufbowlPlayer())
+	{
+		ABoufbowlPlayer* spawned_player = SpawnPlayer(m_SelectedCell->GetLocation());
+
+		if (spawned_player)
+		{
+			m_SelectedCell->SetBoufbowlPlayer(spawned_player);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("ABoufbowlPlayerController::LeftMouseButtonClick couldn't spawn player"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ABoufbowlPlayerController::LeftMouseButtonClick this cell already contains a player"));
+	}
+}
+
+void ABoufbowlPlayerController::MovePlayerToCell(ABoufbowlCell* cell)
+{
+	if (m_SelectedCell && m_SelectedCell->GetBoufbowlPlayer())
+	{
+		UE_LOG(LogTemp, Log, TEXT("ABoufbowlPlayerController::MovePlayerToCell moving player to destination cell"));
+		ABoufbowlPlayer* boufbowl_player = m_SelectedCell->GetBoufbowlPlayer();
+		AAIController* ai_controller = boufbowl_player->GetAIController();
+		ai_controller->MoveToLocation(cell->GetLocation());
+		boufbowl_player->PlayRunAnimation();
+	}
 }
 
 void ABoufbowlPlayerController::LeftMouseButtonClick()
@@ -117,18 +169,65 @@ void ABoufbowlPlayerController::LeftMouseButtonClick()
 	{
 		UE_LOG(LogTemp, Log, TEXT("ABoufbowlPlayerController::LeftMouseButtonClick hit something"));
 
-		SpawnPlayer(m_HitCursor.Location);
-
 		if (m_BoufbowlGrid)
 		{
-			FIntVector cell_id = m_BoufbowlGrid->GetCellIdFromLocation(m_HitCursor.Location);
+			ABoufbowlCell* hit_cell = m_BoufbowlGrid->GetCellFromLocation(m_HitCursor.Location);
 
-			UE_LOG(LogTemp, Log, TEXT("ABoufbowlPlayerController::LeftMouseButtonClick clicked on cell : %d, %d"), cell_id.X, cell_id.Y);
+			if (hit_cell)
+			{
+				if (!m_SelectedCell)
+				{
+					SelectCell(hit_cell);
+					SpawnPlayerSelectedCell();
+				}
+				else
+				{
+					MovePlayerToCell(hit_cell);
+					hit_cell->SetBoufbowlPlayer(m_SelectedCell->GetBoufbowlPlayer());
+					m_SelectedCell->SetBoufbowlPlayer(nullptr);
+					DeselectCell();
+					SelectCell(hit_cell);
+				}	
+			}
 		}
 		else
 		{
 			UE_LOG(LogTemp, Error, TEXT("ABoufbowlPlayerController::LeftMouseButtonClick m_BoufbowlGrid is nullptr"));
 		}
+	}
+}
+
+void ABoufbowlPlayerController::SelectCell(ABoufbowlCell* cell_to_select)
+{
+	m_SelectedCell = cell_to_select;
+	UStaticMeshComponent* static_mesh_component = m_SelectedCell->FindComponentByClass<UStaticMeshComponent>();
+
+	if (static_mesh_component)
+	{
+		static_mesh_component->SetMaterial(0, m_SelectionMaterial);
+		UE_LOG(LogTemp, Log, TEXT("Changed material to selected"));
+	}
+}
+
+void ABoufbowlPlayerController::DeselectCell()
+{
+	UStaticMeshComponent* static_mesh_component = m_SelectedCell->FindComponentByClass<UStaticMeshComponent>();
+
+	if (static_mesh_component)
+	{
+		static_mesh_component->SetMaterial(0, m_BaseCellMaterial);
+		UE_LOG(LogTemp, Log, TEXT("Changed material to non-selected"));
+	}
+	m_SelectedCell = nullptr;
+}
+
+void ABoufbowlPlayerController::RightMouseButtonClick()
+{
+	UE_LOG(LogTemp, Log, TEXT("ABoufbowlPlayerController::RightMouseButtonClick"));
+
+	if (m_SelectedCell)
+	{
+		DeselectCell();
 	}
 }
 

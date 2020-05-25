@@ -7,6 +7,9 @@
 #include "BoufbowlPlayer.generated.h"
 
 class ABoufbowlCamera;
+class AAIController;
+class UAnimSequence;
+class UAnimBlueprint;
 
 UCLASS(Blueprintable)
 class ABoufbowlPlayer : public ACharacter
@@ -19,7 +22,13 @@ public:
 	// Called every frame.
 	virtual void Tick(float DeltaSeconds) override;
 
+	void BeginPlay();
+	AAIController* GetAIController();
+
+	void PlayRunAnimation();
 private:
 	USkeletalMeshComponent* m_MeshComponent;
+	AAIController* m_AIController;
+	UAnimSequence* m_RunSequence;
 };
 

@@ -24,11 +24,12 @@ void ABoufbowlGrid::CreateCells()
 		{
 			if (GetWorld())
 			{
-				ABoufbowlCell* boufbowl_cell = GetWorld()->SpawnActor<ABoufbowlCell>(100.0f * FVector(m_CellSize.X * (float(i) - m_Width / 2.0f + 0.5f), m_CellSize.Y * (float(j) - m_Length / 2.0f + 0.5f), 0.0f), FRotator::ZeroRotator);
+				FVector cell_location = 100.0f * FVector(m_CellSize.X * (float(i) - m_Width / 2.0f + 0.5f), m_CellSize.Y * (float(j) - m_Length / 2.0f + 0.5f), 0.0f);
+				ABoufbowlCell* boufbowl_cell = GetWorld()->SpawnActor<ABoufbowlCell>(cell_location, FRotator::ZeroRotator);
 				if (boufbowl_cell)
 				{
 					FIntVector id = FIntVector(i, j, 0);
-					boufbowl_cell->Initialize(id, m_CellSize);
+					boufbowl_cell->Initialize(id, m_CellSize, cell_location);
 
 					m_Cells.Add(boufbowl_cell);
 				}
@@ -48,7 +49,7 @@ void ABoufbowlGrid::SetCellSize(FVector2D cell_size)
 	m_CellSize = cell_size;
 }
 
-FIntVector ABoufbowlGrid::GetCellIdFromLocation(FVector hit_location)
+ABoufbowlCell* ABoufbowlGrid::GetCellFromLocation(FVector hit_location)
 {
 	FVector2D hit_location_on_grid = FVector2D(hit_location.X, hit_location.Y);
 	UE_LOG(LogTemp, Log, TEXT("Hit location : %f, %f"), hit_location.X, hit_location.Y);
@@ -58,5 +59,5 @@ FIntVector ABoufbowlGrid::GetCellIdFromLocation(FVector hit_location)
 	cell_id.Y = hit_location_on_grid.Y * 0.01f / m_CellSize.Y + m_Length * 0.5;
 	cell_id.Z = 0;
 
-	return cell_id;
+	return m_Cells[cell_id.X * m_Length + cell_id.Y];
 }

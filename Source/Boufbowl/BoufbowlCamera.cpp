@@ -88,7 +88,6 @@ void ABoufbowlCamera::ZoomInByWheel()
 	if (!bCanMoveCamera)    return;
 
 	CameraRadius -= CameraZoomSpeed * FastMoveValue;
-	//CameraRadius = FMath::Clamp(CameraRadius, CameraRadiusMin, CameraRadiusMax);
 }
 
 
@@ -97,7 +96,6 @@ void ABoufbowlCamera::ZoomOutByWheel()
 	if (!bCanMoveCamera)    return;
 
 	CameraRadius += CameraZoomSpeed * FastMoveValue;
-	//CameraRadius = FMath::Clamp(CameraRadius, CameraRadiusMin, CameraRadiusMax);
 }
 
 

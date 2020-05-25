@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "BoufbowlCell.generated.h"
 
+class ABoufbowlPlayer;
+
 UCLASS()
 class ABoufbowlCell : public AActor
 {
@@ -13,9 +15,16 @@ class ABoufbowlCell : public AActor
 public:
 	ABoufbowlCell();
 
-	void Initialize(FIntVector id, FVector2D size);
+	void Initialize(FIntVector id, FVector2D size, FVector location);
 
+	FVector GetLocation();
+
+	ABoufbowlPlayer* GetBoufbowlPlayer();
+	void SetBoufbowlPlayer(ABoufbowlPlayer* boufbowl_player);
 private:
+	ABoufbowlPlayer* m_BoufbowlPlayer;
+
+	void SetLocation(FVector location);
 	void SetId(FIntVector id);
 
 	UStaticMeshComponent* m_StaticMeshComponent;

@@ -17,7 +17,7 @@ public:
 
 	void Initialize(uint8 length, uint8 width, FVector2D cell_size);
 
-	FIntVector GetCellIdFromLocation(FVector hit_location);
+	ABoufbowlCell* GetCellFromLocation(FVector hit_location);
 private:
 	TArray<ABoufbowlCell*> m_Cells;
 	uint8 m_Length;
