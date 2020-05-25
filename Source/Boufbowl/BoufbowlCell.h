@@ -6,6 +6,7 @@
 #include "BoufbowlCell.generated.h"
 
 class ABoufbowlPlayer;
+class UCellUI;
 
 UCLASS()
 class ABoufbowlCell : public AActor
@@ -14,6 +15,7 @@ class ABoufbowlCell : public AActor
 
 public:
 	ABoufbowlCell();
+	void BeginPlay();
 
 	void Initialize(FIntVector id, FVector2D size, FVector location);
 
@@ -23,6 +25,9 @@ public:
 	void SetBoufbowlPlayer(ABoufbowlPlayer* boufbowl_player);
 private:
 	ABoufbowlPlayer* m_BoufbowlPlayer;
+	TSubclassOf<UCellUI> m_CellUIClass;
+
+	UCellUI* m_CellUI;
 
 	void SetLocation(FVector location);
 	void SetId(FIntVector id);

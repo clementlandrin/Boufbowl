@@ -4,6 +4,8 @@
 #include "Components/StaticMeshComponent.h"
 #include "UObject/ConstructorHelpers.h"
 #include "BoufbowlPlayer.h"
+#include "CellUI.h"
+#include "Engine/World.h"
 
 ABoufbowlCell::ABoufbowlCell()
 {
@@ -16,11 +18,29 @@ ABoufbowlCell::ABoufbowlCell()
 
 	if (static_mesh.Succeeded())
 	{
-		UE_LOG(LogTemp, Log, TEXT("ABoufbowlGrid::ABoufbowlGrid static mesh found"));
+		UE_LOG(LogTemp, Log, TEXT("ABoufbowlCell::ABoufbowlCell static mesh found"));
 		m_StaticMeshComponent->SetStaticMesh(static_mesh.Object);
 	}
+
+	static ConstructorHelpers::FObjectFinder<UBlueprint> cell_ui(TEXT("WidgetBlueprint'/Game/TopDownCPP/Blueprints/UI/CellUIWidget.CellUIWidget'"));
+	if (cell_ui.Succeeded())
+	{
+		m_CellUIClass = (UClass*)cell_ui.Object->GeneratedClass;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("ABoufbowlCell::ABoufbowlCell didn't find cell ui blueprint"));
+	}
+	
 }
 
+void ABoufbowlCell::BeginPlay()
+{
+	Super::BeginPlay();
+
+	m_CellUI = CreateWidget<UCellUI>(GetWorld(), m_CellUIClass);
+	m_CellUI->AddToViewport();
+}
 void ABoufbowlCell::SetId(FIntVector id)
 {
 	UE_LOG(LogTemp, Log, TEXT("BoufbowlCell::SetId"));
