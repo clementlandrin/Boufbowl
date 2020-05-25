@@ -15,7 +15,6 @@ class ABoufbowlCell : public AActor
 
 public:
 	ABoufbowlCell();
-	void BeginPlay();
 
 	void Initialize(FIntVector id, FVector2D size, FVector location);
 
@@ -23,6 +22,9 @@ public:
 
 	ABoufbowlPlayer* GetBoufbowlPlayer();
 	void SetBoufbowlPlayer(ABoufbowlPlayer* boufbowl_player);
+
+	void CreateCellUI();
+	void DestroyCellUI();
 private:
 	ABoufbowlPlayer* m_BoufbowlPlayer;
 	TSubclassOf<UCellUI> m_CellUIClass;

@@ -34,13 +34,19 @@ ABoufbowlCell::ABoufbowlCell()
 	
 }
 
-void ABoufbowlCell::BeginPlay()
+void ABoufbowlCell::CreateCellUI()
 {
-	Super::BeginPlay();
-
 	m_CellUI = CreateWidget<UCellUI>(GetWorld(), m_CellUIClass);
 	m_CellUI->AddToViewport();
 }
+
+void ABoufbowlCell::DestroyCellUI()
+{
+	m_CellUI->RemoveFromViewport();
+	m_CellUI->RemoveFromParent();
+	CollectGarbage(RF_NoFlags);
+}
+
 void ABoufbowlCell::SetId(FIntVector id)
 {
 	UE_LOG(LogTemp, Log, TEXT("BoufbowlCell::SetId"));

@@ -207,6 +207,8 @@ void ABoufbowlPlayerController::LeftMouseButtonClick()
 void ABoufbowlPlayerController::SelectCell(ABoufbowlCell* cell_to_select)
 {
 	m_SelectedCell = cell_to_select;
+	m_SelectedCell->CreateCellUI();
+
 	UStaticMeshComponent* static_mesh_component = m_SelectedCell->FindComponentByClass<UStaticMeshComponent>();
 
 	if (static_mesh_component)
@@ -218,6 +220,8 @@ void ABoufbowlPlayerController::SelectCell(ABoufbowlCell* cell_to_select)
 
 void ABoufbowlPlayerController::DeselectCell()
 {
+	m_SelectedCell->DestroyCellUI();
+
 	UStaticMeshComponent* static_mesh_component = m_SelectedCell->FindComponentByClass<UStaticMeshComponent>();
 
 	if (static_mesh_component)
