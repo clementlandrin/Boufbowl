@@ -204,6 +204,11 @@ void ABoufbowlPlayerController::LeftMouseButtonClick()
 	}
 }
 
+ABoufbowlCell* ABoufbowlPlayerController::GetSelectedCell()
+{
+	return m_SelectedCell;
+}
+
 void ABoufbowlPlayerController::SelectCell(ABoufbowlCell* cell_to_select)
 {
 	m_SelectedCell = cell_to_select;

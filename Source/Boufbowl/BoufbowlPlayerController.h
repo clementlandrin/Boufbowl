@@ -26,6 +26,7 @@ public:
 
 	void SetGrid(ABoufbowlGrid* boufbowl_grid);
 
+	ABoufbowlCell* GetSelectedCell();
 protected:
 	ABoufbowlGrid* m_BoufbowlGrid;
 	ABoufbowlCell* m_SelectedCell;

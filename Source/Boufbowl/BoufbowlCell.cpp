@@ -6,6 +6,7 @@
 #include "BoufbowlPlayer.h"
 #include "CellUI.h"
 #include "Engine/World.h"
+#include "BoufbowlPlayerController.h"
 
 ABoufbowlCell::ABoufbowlCell()
 {
@@ -30,6 +31,23 @@ ABoufbowlCell::ABoufbowlCell()
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("ABoufbowlCell::ABoufbowlCell didn't find cell ui blueprint"));
+	}
+	
+	PrimaryActorTick.bCanEverTick = true;
+}
+
+void ABoufbowlCell::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+
+	// Really hope this won't break in multiplayer
+	ABoufbowlPlayerController* local_player_controller = Cast<ABoufbowlPlayerController>(GetWorld()->GetFirstPlayerController());
+	if (m_CellUI && local_player_controller && local_player_controller->GetSelectedCell() && local_player_controller->GetSelectedCell() == this)
+	{
+		FVector2D screen_location;
+		local_player_controller->ProjectWorldLocationToScreen(m_Location, screen_location);
+		m_CellUI->SetPositionInViewport(screen_location);
 	}
 	
 }
