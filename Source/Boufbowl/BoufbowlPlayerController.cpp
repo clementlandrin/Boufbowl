@@ -175,12 +175,14 @@ void ABoufbowlPlayerController::LeftMouseButtonClick()
 
 			if (hit_cell)
 			{
+				// Select a cell
 				if (!m_SelectedCell)
 				{
 					SelectCell(hit_cell);
 					SpawnPlayerSelectedCell();
 				}
-				else
+				// Move player to the hit cell
+				else if (!hit_cell->GetBoufbowlPlayer())
 				{
 					MovePlayerToCell(hit_cell);
 					hit_cell->SetBoufbowlPlayer(m_SelectedCell->GetBoufbowlPlayer());
@@ -188,6 +190,11 @@ void ABoufbowlPlayerController::LeftMouseButtonClick()
 					DeselectCell();
 					SelectCell(hit_cell);
 				}	
+				// Hit cell is occupied
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("ABoufbowlCell::LeftMouseButtonClick cell is occupied, won't move player"));
+				}
 			}
 		}
 		else
@@ -228,30 +235,6 @@ void ABoufbowlPlayerController::RightMouseButtonClick()
 	if (m_SelectedCell)
 	{
 		DeselectCell();
-	}
-}
-
-void ABoufbowlPlayerController::MoveToMouseCursor()
-{	
-	if (m_HitCursor.bBlockingHit)
-	{
-		// We hit something, move there
-		SetNewMoveDestination(m_HitCursor.ImpactPoint);
-	}
-}
-
-void ABoufbowlPlayerController::SetNewMoveDestination(const FVector DestLocation)
-{
-	APawn* const MyPawn = GetPawn();
-	if (MyPawn)
-	{
-		float const Distance = FVector::Dist(DestLocation, MyPawn->GetActorLocation());
-
-		// We need to issue move command only if far enough in order for walk animation to play correctly
-		if ((Distance > 120.0f))
-		{
-			UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, DestLocation);
-		}
 	}
 }
 

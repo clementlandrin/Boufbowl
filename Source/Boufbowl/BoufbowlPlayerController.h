@@ -63,16 +63,6 @@ protected:
 	void RightMouseButtonClick();
 
 	ABoufbowlPlayer* SpawnPlayer(FVector location);
-
-	/** Navigate player to the current mouse cursor location. */
-	void MoveToMouseCursor();
-	
-	/** Navigate player to the given world location. */
-	void SetNewMoveDestination(const FVector DestLocation);
-
-	/** Input handlers for SetDestination action. */
-	void OnSetDestinationPressed();
-	void OnSetDestinationReleased();
 };
 
 
