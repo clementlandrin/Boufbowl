@@ -26,7 +26,7 @@ ABoufbowlCamera::ABoufbowlCamera(const FObjectInitializer& ObjectInitializer)
 	CameraHeightMax = 5000.f;
 
 	CameraRadius = 2000.f;
-	CameraRadiusMin = 0.0f;                // 100 for debugging
+	CameraRadiusMin = 1.0f;                // 100 for debugging
 	CameraRadiusMax = 8000.f;
 
 	CameraZAnlge = 0.f;                        // yaw
@@ -80,7 +80,8 @@ void ABoufbowlCamera::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	// double speed (WASD +Shift)
 	PlayerInputComponent->BindAxis("FastMove", this, &ABoufbowlCamera::FastMoveInput);
 	// yaw and pitch (WASD +Ctrl)
-	PlayerInputComponent->BindAxis("Rotate", this, &ABoufbowlCamera::RotateInput);
+	PlayerInputComponent->BindAction("RotateLeftByWheel", IE_Pressed, this, &ABoufbowlCamera::RotateLeftByWheel);
+	PlayerInputComponent->BindAction("RotateRightByWheel", IE_Pressed, this, &ABoufbowlCamera::RotateRightByWheel);
 }
 
 void ABoufbowlCamera::ZoomInByWheel()
@@ -119,7 +120,7 @@ void ABoufbowlCamera::RotateUpByWheel()
 {
 	if (!bCanMoveCamera)    return;
 
-	CameraHeightAngle += CameraRotationSpeed * FastMoveValue;
+	//CameraHeightAngle += CameraRotationSpeed * FastMoveValue;
 	//CameraHeightAngle = FMath::Clamp(CameraHeightAngle, CameraHeightAngleMin, CameraHeightAngleMax);
 }
 
@@ -128,7 +129,7 @@ void ABoufbowlCamera::RotateDownByWheel()
 {
 	if (!bCanMoveCamera)    return;
 
-	CameraHeightAngle -= CameraRotationSpeed * FastMoveValue;
+	//CameraHeightAngle -= CameraRotationSpeed * FastMoveValue;
 	//CameraHeightAngle = FMath::Clamp(CameraHeightAngle, CameraHeightAngleMin, CameraHeightAngleMax);
 }
 
@@ -174,6 +175,8 @@ void ABoufbowlCamera::FastMoveInput(float Direction)
 
 void ABoufbowlCamera::RotateInput(float Direction)
 {
+	if(Direction != 0.0)
+		UE_LOG(LogTemp, Error, TEXT("Rotate"));
 	if (!bCanMoveCamera)    return;
 
 	// left or right does not matter
@@ -251,10 +254,8 @@ void ABoufbowlCamera::ZoomCameraIn(float Direction)
 
 void ABoufbowlCamera::TurnCameraUp(float Direction)
 {
-	CameraHeightAngle -= Direction * CameraRotationSpeed * 10.0f;
+	//CameraHeightAngle -= Direction * CameraRotationSpeed * 10.0f;
 	//CameraHeightAngle = FMath::Clamp(CameraHeightAngle, CameraHeightAngleMin, CameraHeightAngleMax);
-
-	//RepositionCamera();
 }
 
 
@@ -315,24 +316,24 @@ void ABoufbowlCamera::Tick(float DeltaSeconds)
 
 		// vertical movement
 		CameraHeight += MoveCameraUp(MoveUpValue * FastMoveValue * DeltaSeconds);
-		//CameraHeight = FMath::Clamp(CameraHeight, CameraHeightMin, CameraHeightMax);
+		CameraHeight = FMath::Clamp(CameraHeight, CameraHeightMin, CameraHeightMax);
 
 		ActualLocation.Z = CameraHeight;
 
 		// limit movement area
-		//ActualLocation.X = FMath::Clamp(ActualLocation.X, -CameraXYLimit, CameraXYLimit);
-		//ActualLocation.Y = FMath::Clamp(ActualLocation.Y, -CameraXYLimit, CameraXYLimit);
+		ActualLocation.X = FMath::Clamp(ActualLocation.X, -CameraXYLimit, CameraXYLimit);
+		ActualLocation.Y = FMath::Clamp(ActualLocation.Y, -CameraXYLimit, CameraXYLimit);
 
 		// move actor
 		SetActorLocation(ActualLocation);
 
 		// tweak camera component relative transform
 		// set rotation parameters
-		if (RotateValue != 0.f)
+		/*if (RotateValue != 0.f)
 		{
 			TurnCameraUp(MoveForwardValue * FastMoveValue * DeltaSeconds);
 			TurnCameraRight(MoveRightValue * FastMoveValue * DeltaSeconds);
-		}
+		}*/
 
 		// set zoom distance
 		ZoomCameraIn(ZoomInValue * FastMoveValue * DeltaSeconds);

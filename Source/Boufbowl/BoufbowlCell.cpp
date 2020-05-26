@@ -40,7 +40,6 @@ void ABoufbowlCell::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-
 	// Really hope this won't break in multiplayer
 	ABoufbowlPlayerController* local_player_controller = Cast<ABoufbowlPlayerController>(GetWorld()->GetFirstPlayerController());
 	if (m_CellUI && local_player_controller && local_player_controller->GetSelectedCell() && local_player_controller->GetSelectedCell() == this)
@@ -49,13 +48,13 @@ void ABoufbowlCell::Tick(float DeltaSeconds)
 		local_player_controller->ProjectWorldLocationToScreen(m_Location, screen_location);
 		m_CellUI->SetPositionInViewport(screen_location);
 	}
-	
 }
 
 void ABoufbowlCell::CreateCellUI()
 {
 	m_CellUI = CreateWidget<UCellUI>(GetWorld(), m_CellUIClass);
 	m_CellUI->AddToViewport();
+	m_CellUI->SetCell(this);
 }
 
 void ABoufbowlCell::DestroyCellUI()
