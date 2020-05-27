@@ -27,10 +27,16 @@ public:
 	void SetGrid(ABoufbowlGrid* boufbowl_grid);
 
 	ABoufbowlCell* GetSelectedCell();
+
+	void MoveSavedPlayerToSelectedCell();
 protected:
 	ABoufbowlGrid* m_BoufbowlGrid;
 	ABoufbowlCell* m_SelectedCell;
 
+	ABoufbowlCell* m_SavedCell;
+
+	void SaveCell(ABoufbowlCell* cell_to_save);
+	void UnsaveCell();
 	void SelectCell(ABoufbowlCell* cell_to_select);
 	void DeselectCell();
 
@@ -48,6 +54,8 @@ protected:
 	UMaterial* m_DecalMaterial;
 	/** Stands for selection material */
 	UMaterial* m_SelectionMaterial;
+	/** Stands for saved material */
+	UMaterial* m_SavedMaterial;
 	/** Stands for basic cell material */
 	UMaterial* m_BaseCellMaterial;
 
@@ -57,8 +65,6 @@ protected:
 	// End PlayerController interface
 
 	void SpawnPlayerSelectedCell();
-
-	void MovePlayerToCell(ABoufbowlCell* cell);
 
 	void LeftMouseButtonClick();
 	void RightMouseButtonClick();

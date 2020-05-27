@@ -59,6 +59,8 @@ void ABoufbowlCell::CreateCellUI()
 
 void ABoufbowlCell::DestroyCellUI()
 {
+	if (!m_CellUI)
+		return;
 	m_CellUI->RemoveFromViewport();
 	m_CellUI->RemoveFromParent();
 	CollectGarbage(RF_NoFlags);

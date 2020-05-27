@@ -7,6 +7,8 @@
 #include "BoufbowlPlayer.generated.h"
 
 class ABoufbowlCamera;
+class ABoufbowlPlayerController;
+class ABoufbowlCell;
 class AAIController;
 class UAnimSequence;
 class UAnimBlueprint;
@@ -24,9 +26,14 @@ public:
 
 	void BeginPlay();
 	AAIController* GetAIController();
+	void SetOwnerController(ABoufbowlPlayerController* owner_controller);
+	ABoufbowlPlayerController* GetOwnerController();
 
 	void PlayRunAnimation();
+
+	static ABoufbowlPlayer* SpawnPlayer(FString mesh_path, ABoufbowlCell* cell, ABoufbowlPlayerController* owner_controller);
 private:
+	ABoufbowlPlayerController* m_OwnerController;
 	USkeletalMeshComponent* m_MeshComponent;
 	AAIController* m_AIController;
 	UAnimSequence* m_RunSequence;

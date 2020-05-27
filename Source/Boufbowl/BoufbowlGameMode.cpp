@@ -29,6 +29,7 @@ void ABoufbowlGameMode::BeginPlay()
 		{
 			UE_LOG(LogTemp, Log, TEXT("ABoufbowlGameMode::BeginPlay properly spawned boufbowl_grid"));
 
+			int controller_id = 0;
 			for (FConstControllerIterator controller_itr = GetWorld()->GetControllerIterator(); controller_itr; ++controller_itr)
 			{
 				ABoufbowlPlayerController* boufbowl_player_controller = Cast<ABoufbowlPlayerController>(*controller_itr);
@@ -37,7 +38,10 @@ void ABoufbowlGameMode::BeginPlay()
 					UE_LOG(LogTemp, Warning, TEXT("ABoufbowlGameMode::BeginPlay found player controller"));
 
 					boufbowl_player_controller->SetGrid(boufbowl_grid);
+					ABoufbowlPlayer::SpawnPlayer(TEXT("SkeletalMesh'/Game/Mannequin/Character/Mesh/SK_Mannequin.SK_Mannequin'"), boufbowl_grid->GetCells()[controller_id], boufbowl_player_controller);
 				}
+
+				controller_id++;
 			}
 		}
 	}

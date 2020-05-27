@@ -2,6 +2,8 @@
 
 #include "Components/Button.h"
 #include "BoufbowlCell.h"
+#include "BoufbowlPlayer.h"
+#include "BoufbowlPlayerController.h"
 
 UCellUI::UCellUI(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -16,11 +18,30 @@ void UCellUI::SetCell(ABoufbowlCell* cell)
 void UCellUI::OnClickSpawnButton()
 {
 	UE_LOG(LogTemp, Log, TEXT("UCellUI::OnClickSpawnButton"));
+
+	if (!m_BoufbowlCell->GetBoufbowlPlayer())
+	{
+		ABoufbowlPlayerController* local_player_controller = Cast<ABoufbowlPlayerController>(GetWorld()->GetFirstPlayerController());
+		ABoufbowlPlayer::SpawnPlayer(TEXT("SkeletalMesh'/Game/Mannequin/Character/Mesh/SK_Mannequin.SK_Mannequin'"), m_BoufbowlCell, local_player_controller);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("UCellUI::OnClickSpawnButton won't spawn, cell already occupied"));
+	}
 }
 
 void UCellUI::OnClickMoveButton()
 {
 	UE_LOG(LogTemp, Log, TEXT("UCellUI::OnClickMoveButton"));
+
+	ABoufbowlPlayerController* local_player_controller = Cast<ABoufbowlPlayerController>(GetWorld()->GetFirstPlayerController());
+	if (!local_player_controller)
+	{
+		UE_LOG(LogTemp, Error, TEXT("UCellUI::OnClickMoveButton no local player controller"));
+		return;
+	}
+
+	local_player_controller->MoveSavedPlayerToSelectedCell();
 }
 
 void UCellUI::OnClickAttackButton()

@@ -11,6 +11,48 @@
 #include "AIController.h"
 #include "Animation/AnimSequence.h"
 #include "Animation/AnimBlueprint.h"
+#include "BoufbowlCell.h"
+
+ABoufbowlPlayer* ABoufbowlPlayer::SpawnPlayer(FString mesh_path, ABoufbowlCell* cell, ABoufbowlPlayerController* owner_controller)
+{
+	UE_LOG(LogTemp, Log, TEXT("ABoufbowlPlayer::SpawnPlayer"));
+	
+	if (!cell->GetBoufbowlPlayer())
+	{
+		USkeletalMesh* skeletal_mesh = LoadObject<USkeletalMesh>(NULL, *mesh_path, NULL, LOAD_None, NULL);
+
+		FVector location = cell->GetLocation();
+		if (skeletal_mesh)
+		{
+			UE_LOG(LogTemp, Log, TEXT("ABoufbowlPlayer::SpawnPlayer found skeletal mesh"))
+				FVector BoundsBoxExtent = skeletal_mesh->GetBounds().BoxExtent;
+			location.Z += BoundsBoxExtent.Z / 2 + 10.0f;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Log, TEXT("ABoufbowlPlayer::SpawnPlayer no skeletal mesh"));
+		}
+
+		FTransform actual_spawn_transform = FTransform(FRotator(0.0f, 0.0f, 0.0f), location);
+
+		FActorSpawnParameters spawn_parameters;
+		spawn_parameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+		ABoufbowlPlayer* spawned_player = cell->GetWorld()->SpawnActor<ABoufbowlPlayer>(
+			ABoufbowlPlayer::StaticClass(), actual_spawn_transform, spawn_parameters);
+
+		if (spawned_player)
+		{
+			spawned_player->SetOwnerController(owner_controller);
+			cell->SetBoufbowlPlayer(spawned_player);
+		}
+		return spawned_player;
+	}
+	else
+	{
+		return nullptr;
+	}
+}
 
 ABoufbowlPlayer::ABoufbowlPlayer(const FObjectInitializer& ObjectInitializer)
 {
@@ -87,6 +129,16 @@ void ABoufbowlPlayer::Tick(float DeltaSeconds)
 AAIController* ABoufbowlPlayer::GetAIController()
 {
 	return m_AIController;
+}
+
+ABoufbowlPlayerController* ABoufbowlPlayer::GetOwnerController()
+{
+	return m_OwnerController;
+}
+
+void ABoufbowlPlayer::SetOwnerController(ABoufbowlPlayerController* owner_controller)
+{
+	m_OwnerController = owner_controller;
 }
 
 void ABoufbowlPlayer::PlayRunAnimation()

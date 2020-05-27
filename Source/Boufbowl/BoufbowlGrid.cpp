@@ -61,3 +61,8 @@ ABoufbowlCell* ABoufbowlGrid::GetCellFromLocation(FVector hit_location)
 
 	return m_Cells[cell_id.X * m_Length + cell_id.Y];
 }
+
+TArray<ABoufbowlCell*> ABoufbowlGrid::GetCells()
+{
+	return m_Cells;
+}

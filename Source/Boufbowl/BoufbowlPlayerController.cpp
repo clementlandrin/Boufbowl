@@ -40,6 +40,12 @@ ABoufbowlPlayerController::ABoufbowlPlayerController()
 		m_SelectionMaterial = SelectionMaterialAsset.Object;
 	}
 
+	ConstructorHelpers::FObjectFinder<UMaterial> SavedMaterialAsset(TEXT("Material'/Game/Geometry/Meshes/SavedMaterial.SavedMaterial'"));
+	if (SavedMaterialAsset.Succeeded())
+	{
+		m_SavedMaterial = SavedMaterialAsset.Object;
+	}
+
 	ConstructorHelpers::FObjectFinder<USkeletalMesh> MannequinSkeletalMesh(TEXT("SkeletalMesh'/Game/Mannequin/Character/Mesh/SK_Mannequin.SK_Mannequin'"));
 	if (MannequinSkeletalMesh.Succeeded())
 	{
@@ -100,64 +106,20 @@ void ABoufbowlPlayerController::SetupInputComponent()
 	//InputComponent->BindAction("MiddleMouseButton", IE_Pressed, this, &ABoufbowlPlayerController::MiddleMouseButtonClick);
 }
 
-ABoufbowlPlayer* ABoufbowlPlayerController::SpawnPlayer(FVector location)
+void ABoufbowlPlayerController::MoveSavedPlayerToSelectedCell()
 {
-	UE_LOG(LogTemp, Log, TEXT("ABoufbowlPlayerController::SpawnPlayer"));
-
-	USkeletalMesh* skeletal_mesh = m_SkeletalMesh;
-
-	if (skeletal_mesh)
-	{
-		UE_LOG(LogTemp, Log, TEXT("ABOufbowlPlayerController::SpawnPlayer found skeletal mesh"))
-		FVector BoundsBoxExtent = skeletal_mesh->GetBounds().BoxExtent;
-		location.Z += BoundsBoxExtent.Z / 2 + 10.0f;
-	}
-	else
-	{
-		UE_LOG(LogTemp, Log, TEXT("ABoufbowlPlayerController::SpawnPlayer no skeletal mesh"));
-	}
-
-	FTransform actual_spawn_transform = FTransform(FRotator(0.0f, 0.0f, 0.0f), location);
-
-	FActorSpawnParameters spawn_parameters;
-	spawn_parameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-	ABoufbowlPlayer* spawned_player = GetWorld()->SpawnActor<ABoufbowlPlayer>(
-		ABoufbowlPlayer::StaticClass(), actual_spawn_transform, spawn_parameters);
-
-	return spawned_player;
-}
-
-void ABoufbowlPlayerController::SpawnPlayerSelectedCell()
-{
-	if (!m_SelectedCell->GetBoufbowlPlayer())
-	{
-		ABoufbowlPlayer* spawned_player = SpawnPlayer(m_SelectedCell->GetLocation());
-
-		if (spawned_player)
-		{
-			m_SelectedCell->SetBoufbowlPlayer(spawned_player);
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("ABoufbowlPlayerController::LeftMouseButtonClick couldn't spawn player"));
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("ABoufbowlPlayerController::LeftMouseButtonClick this cell already contains a player"));
-	}
-}
-
-void ABoufbowlPlayerController::MovePlayerToCell(ABoufbowlCell* cell)
-{
-	if (m_SelectedCell && m_SelectedCell->GetBoufbowlPlayer())
+	if (m_SavedCell && m_SavedCell->GetBoufbowlPlayer() && !m_SelectedCell->GetBoufbowlPlayer())
 	{
 		UE_LOG(LogTemp, Log, TEXT("ABoufbowlPlayerController::MovePlayerToCell moving player to destination cell"));
-		ABoufbowlPlayer* boufbowl_player = m_SelectedCell->GetBoufbowlPlayer();
+		ABoufbowlPlayer* boufbowl_player = m_SavedCell->GetBoufbowlPlayer();
 		AAIController* ai_controller = boufbowl_player->GetAIController();
-		ai_controller->MoveToLocation(cell->GetLocation());
+		ai_controller->MoveToLocation(m_SelectedCell->GetLocation());
 		boufbowl_player->PlayRunAnimation();
+
+		m_SavedCell->SetBoufbowlPlayer(nullptr);
+		m_SelectedCell->SetBoufbowlPlayer(boufbowl_player);
+		UnsaveCell();
+		DeselectCell();
 	}
 }
 
@@ -178,22 +140,23 @@ void ABoufbowlPlayerController::LeftMouseButtonClick()
 				// Select a cell
 				if (!m_SelectedCell)
 				{
+					if (!hit_cell->GetBoufbowlPlayer())
+						return;
+
 					SelectCell(hit_cell);
-					SpawnPlayerSelectedCell();
 				}
-				// Move player to the hit cell
-				else if (!hit_cell->GetBoufbowlPlayer())
+				// if one cell is selected and the player is ours
+				else if (m_SelectedCell->GetBoufbowlPlayer() && m_SelectedCell->GetBoufbowlPlayer()->GetOwnerController() && m_SelectedCell->GetBoufbowlPlayer()->GetOwnerController() == this)
 				{
-					MovePlayerToCell(hit_cell);
-					hit_cell->SetBoufbowlPlayer(m_SelectedCell->GetBoufbowlPlayer());
-					m_SelectedCell->SetBoufbowlPlayer(nullptr);
+					ABoufbowlCell* temp_cell = m_SelectedCell;
 					DeselectCell();
+					SaveCell(temp_cell);
 					SelectCell(hit_cell);
-				}	
-				// Hit cell is occupied
+				}
 				else
 				{
-					UE_LOG(LogTemp, Warning, TEXT("ABoufbowlCell::LeftMouseButtonClick cell is occupied, won't move player"));
+					DeselectCell();
+					SelectCell(hit_cell);
 				}
 			}
 		}
@@ -202,6 +165,32 @@ void ABoufbowlPlayerController::LeftMouseButtonClick()
 			UE_LOG(LogTemp, Error, TEXT("ABoufbowlPlayerController::LeftMouseButtonClick m_BoufbowlGrid is nullptr"));
 		}
 	}
+}
+
+void ABoufbowlPlayerController::SaveCell(ABoufbowlCell* cell_to_save)
+{
+	m_SavedCell = cell_to_save;
+
+	UStaticMeshComponent* static_mesh_component = m_SavedCell->FindComponentByClass<UStaticMeshComponent>();
+
+	if (static_mesh_component)
+	{
+		static_mesh_component->SetMaterial(0, m_SavedMaterial);
+		UE_LOG(LogTemp, Log, TEXT("Changed material to saved"));
+	}
+}
+
+void ABoufbowlPlayerController::UnsaveCell()
+{
+	UStaticMeshComponent* static_mesh_component = m_SavedCell->FindComponentByClass<UStaticMeshComponent>();
+
+	if (static_mesh_component)
+	{
+		static_mesh_component->SetMaterial(0, m_BaseCellMaterial);
+		UE_LOG(LogTemp, Log, TEXT("Changed material to base"));
+	}
+
+	m_SavedCell = nullptr;
 }
 
 ABoufbowlCell* ABoufbowlPlayerController::GetSelectedCell()
@@ -225,6 +214,9 @@ void ABoufbowlPlayerController::SelectCell(ABoufbowlCell* cell_to_select)
 
 void ABoufbowlPlayerController::DeselectCell()
 {
+	if (!m_SelectedCell)
+		return;
+
 	m_SelectedCell->DestroyCellUI();
 
 	UStaticMeshComponent* static_mesh_component = m_SelectedCell->FindComponentByClass<UStaticMeshComponent>();
@@ -244,6 +236,10 @@ void ABoufbowlPlayerController::RightMouseButtonClick()
 	if (m_SelectedCell)
 	{
 		DeselectCell();
+	}
+	if (m_SavedCell)
+	{
+		UnsaveCell();
 	}
 }
 
