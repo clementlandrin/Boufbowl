@@ -108,7 +108,18 @@ ABoufbowlPlayer::ABoufbowlPlayer(const FObjectInitializer& ObjectInitializer)
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("ABoufbowlPlayer::ABoufbowlPlayer failed to load walk animation"));
+		UE_LOG(LogTemp, Error, TEXT("ABoufbowlPlayer::ABoufbowlPlayer failed to load run animation"));
+	}
+
+	static ConstructorHelpers::FObjectFinder<UAnimSequence> damage_anim_obj(TEXT("AnimSequence'/Game/Mannequin/Animations/NewAnimation.NewAnimation'"));
+	if (damage_anim_obj.Succeeded())
+	{
+		m_DamageSequence = damage_anim_obj.Object;
+		m_DamageSequence->SetSkeleton(mesh_skeleton);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("ABoufbowlPlayer::ABoufbowlPlayer failed to load damage animation"));
 	}
 }
 
@@ -141,6 +152,15 @@ void ABoufbowlPlayer::SetOwnerController(ABoufbowlPlayerController* owner_contro
 	m_OwnerController = owner_controller;
 }
 
+void ABoufbowlPlayer::TakeDamage(uint8 damage_amount)
+{
+	UE_LOG(LogTemp, Log, TEXT("ABoufbowlPlayer::TakeDamage"));
+
+	m_Health -= damage_amount;
+	
+	PlayDamageAnimation();
+}
+
 void ABoufbowlPlayer::PlayRunAnimation()
 {
 	GetMesh()->SetAnimation(m_RunSequence);
@@ -148,11 +168,30 @@ void ABoufbowlPlayer::PlayRunAnimation()
 	if (m_RunSequence->IsValidToPlay())
 	{
 		GetMesh()->Play(true);
-		//GetMesh()->PlayAnimation(m_RunSequence, true);
 		UE_LOG(LogTemp, Log, TEXT("ABoufbowlPlayer::PlayRunAnimation playing running animation"));
 	}
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("ABoufbowlPlayer::PlayRunAnimation run sequence is not valid"));
 	}
+}
+
+void ABoufbowlPlayer::PlayDamageAnimation()
+{
+	GetMesh()->SetAnimation(m_DamageSequence);
+
+	if (m_DamageSequence->IsValidToPlay())
+	{
+		GetMesh()->Play(true);
+		UE_LOG(LogTemp, Log, TEXT("ABoufbowlPlayer::PlayDamageAnimation playing damage animation"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("ABoufbowlPlayer::PlayDamageAnimation damage sequence is not valid"));
+	}
+}
+
+uint8 ABoufbowlPlayer::GetHealth()
+{
+	return m_Health;
 }

@@ -114,10 +114,24 @@ void ABoufbowlPlayerController::MoveSavedPlayerToSelectedCell()
 		ABoufbowlPlayer* boufbowl_player = m_SavedCell->GetBoufbowlPlayer();
 		AAIController* ai_controller = boufbowl_player->GetAIController();
 		ai_controller->MoveToLocation(m_SelectedCell->GetLocation());
-		boufbowl_player->PlayRunAnimation();
+		//boufbowl_player->PlayRunAnimation();
 
-		m_SavedCell->SetBoufbowlPlayer(nullptr);
 		m_SelectedCell->SetBoufbowlPlayer(boufbowl_player);
+		UnsaveCell();
+		DeselectCell();
+	}
+}
+
+void ABoufbowlPlayerController::AttackEnnemyWithSavedPlayer()
+{
+
+	if (m_SavedCell && m_SavedCell->GetBoufbowlPlayer() && m_SelectedCell->GetBoufbowlPlayer())
+	{
+		if (!m_SelectedCell->GetBoufbowlPlayer()->GetOwnerController() || m_SelectedCell->GetBoufbowlPlayer()->GetOwnerController() != this)
+		UE_LOG(LogTemp, Log, TEXT("ABoufbowlPlayerController::AttackEnnemyWithSavedPlayer attacking ennemy"));
+		ABoufbowlPlayer* ennemy_player = m_SelectedCell->GetBoufbowlPlayer();
+		
+		ennemy_player->TakeDamage(1);
 		UnsaveCell();
 		DeselectCell();
 	}
@@ -140,14 +154,20 @@ void ABoufbowlPlayerController::LeftMouseButtonClick()
 				// Select a cell
 				if (!m_SelectedCell)
 				{
+					UE_LOG(LogTemp, Log, TEXT("ABoufbowlPlayerController::LeftMouseButtonClick no selected cell"));
 					if (!hit_cell->GetBoufbowlPlayer())
+					{
+						UE_LOG(LogTemp, Log, TEXT("ABoufbowlPlayerController::LeftMouseButtonClick hitten cell has no player, won't select"));
 						return;
+					}
 
+					UE_LOG(LogTemp, Log, TEXT("ABoufbowlPlayerController::LeftMouseButtonClick hitten cell has a player, select"));
 					SelectCell(hit_cell);
 				}
-				// if one cell is selected and the player is ours
-				else if (m_SelectedCell->GetBoufbowlPlayer() && m_SelectedCell->GetBoufbowlPlayer()->GetOwnerController() && m_SelectedCell->GetBoufbowlPlayer()->GetOwnerController() == this)
+				// if one cell is selected and the player is ours, save the selected cell and selected the hitten one
+				else if (m_SelectedCell->GetBoufbowlPlayer() && m_SelectedCell->GetBoufbowlPlayer()->GetOwnerController() && (m_SelectedCell->GetBoufbowlPlayer()->GetOwnerController() == this))
 				{
+					UE_LOG(LogTemp, Log, TEXT("ABoufbowlPlayerController::LeftMouseButtonClick selected player is ours, saving cell process"));
 					ABoufbowlCell* temp_cell = m_SelectedCell;
 					DeselectCell();
 					SaveCell(temp_cell);
@@ -155,8 +175,14 @@ void ABoufbowlPlayerController::LeftMouseButtonClick()
 				}
 				else
 				{
+					UE_LOG(LogTemp, Log, TEXT("ABoufbowlPlayerController::LeftMouseButtonClick there is a selected cell but player is not ours"));
 					DeselectCell();
-					SelectCell(hit_cell);
+
+					if (hit_cell->GetBoufbowlPlayer())
+					{
+						UE_LOG(LogTemp, Log, TEXT("ABoufbowlPlayerController::LeftMouseButtonClick hitten cell has a player, select"));
+						SelectCell(hit_cell);
+					}
 				}
 			}
 		}
@@ -196,6 +222,11 @@ void ABoufbowlPlayerController::UnsaveCell()
 ABoufbowlCell* ABoufbowlPlayerController::GetSelectedCell()
 {
 	return m_SelectedCell;
+}
+
+ABoufbowlCell* ABoufbowlPlayerController::GetSavedCell()
+{
+	return m_SavedCell;
 }
 
 void ABoufbowlPlayerController::SelectCell(ABoufbowlCell* cell_to_select)

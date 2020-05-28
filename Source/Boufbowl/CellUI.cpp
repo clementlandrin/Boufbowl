@@ -1,6 +1,7 @@
 #include "CellUI.h"
 
 #include "Components/Button.h"
+#include "Components/TextBlock.h"
 #include "BoufbowlCell.h"
 #include "BoufbowlPlayer.h"
 #include "BoufbowlPlayerController.h"
@@ -47,11 +48,36 @@ void UCellUI::OnClickMoveButton()
 void UCellUI::OnClickAttackButton()
 {
 	UE_LOG(LogTemp, Log, TEXT("UCellUI::OnClickAttackButton"));
+
+	ABoufbowlPlayerController* local_player_controller = Cast<ABoufbowlPlayerController>(GetWorld()->GetFirstPlayerController());
+	if (!local_player_controller)
+	{
+		UE_LOG(LogTemp, Error, TEXT("UCellUI::OnClickMoveButton no local player controller"));
+		return;
+	}
+
+	local_player_controller->AttackEnnemyWithSavedPlayer();
 }
 
 void UCellUI::OnClickBallButton()
 {
 	UE_LOG(LogTemp, Log, TEXT("UCellUI::OnClickBallButton"));
+}
+
+void UCellUI::OnClickInfoButton()
+{
+	UE_LOG(LogTemp, Log, TEXT("UCellUI::OnClickInfoButton"));
+
+	if (m_InfoPanel->Visibility == ESlateVisibility::Visible)
+	{
+		UE_LOG(LogTemp, Log, TEXT("UCellUI::OnClickInfoButton hide info panel"));
+		m_InfoPanel->SetVisibility(ESlateVisibility::Hidden);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("UCellUI::OnClickInfoButton display info panel"));
+		m_InfoPanel->SetVisibility(ESlateVisibility::Visible);
+	}
 }
 
 void UCellUI::NativeConstruct()
@@ -69,6 +95,8 @@ void UCellUI::NativeConstruct()
 		m_AttackButton->OnClicked.AddDynamic(this, &UCellUI::OnClickAttackButton);
 	if (!m_BallButton->OnClicked.IsBound())
 		m_BallButton->OnClicked.AddDynamic(this, &UCellUI::OnClickBallButton);
+	if (!m_InfoButton->OnClicked.IsBound())
+		m_InfoButton->OnClicked.AddDynamic(this, &UCellUI::OnClickInfoButton);
 }
 
 

@@ -43,6 +43,8 @@ void ABoufbowlGameMode::BeginPlay()
 
 				controller_id++;
 			}
+
+			ABoufbowlPlayer::SpawnPlayer(TEXT("SkeletalMesh'/Game/Mannequin/Character/Mesh/SK_Mannequin.SK_Mannequin'"), boufbowl_grid->GetCells()[boufbowl_grid->GetCells().Num() - 1], nullptr);
 		}
 	}
 }

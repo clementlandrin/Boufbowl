@@ -1,12 +1,16 @@
 // Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
 
 #include "BoufbowlCell.h"
+
 #include "Components/StaticMeshComponent.h"
 #include "UObject/ConstructorHelpers.h"
 #include "BoufbowlPlayer.h"
 #include "CellUI.h"
 #include "Engine/World.h"
 #include "BoufbowlPlayerController.h"
+#include "Components/Button.h"
+#include "Components/TextBlock.h"
+#include "Engine/Classes/Kismet/KismetStringLibrary.h"
 
 ABoufbowlCell::ABoufbowlCell()
 {
@@ -53,8 +57,46 @@ void ABoufbowlCell::Tick(float DeltaSeconds)
 void ABoufbowlCell::CreateCellUI()
 {
 	m_CellUI = CreateWidget<UCellUI>(GetWorld(), m_CellUIClass);
-	m_CellUI->AddToViewport();
-	m_CellUI->SetCell(this);
+	if (m_CellUI)
+	{
+		m_CellUI->AddToViewport();
+		m_CellUI->SetCell(this);
+
+		ABoufbowlPlayerController* local_player_controller = Cast<ABoufbowlPlayerController>(GetWorld()->GetFirstPlayerController());
+		ABoufbowlPlayerController* ennemy_player_controller = nullptr;
+
+		if (m_BoufbowlPlayer)
+		{
+			ennemy_player_controller = m_BoufbowlPlayer->GetOwnerController();
+		}
+
+		// Hide move button
+		if (m_BoufbowlPlayer || (local_player_controller && !local_player_controller->GetSelectedCell()))
+		{
+			UE_LOG(LogTemp, Log, TEXT("ABoufbowlCell::CreateCellUI hidding move button"));
+			m_CellUI->m_MoveButton->SetVisibility(ESlateVisibility::Hidden);
+		}
+
+		// Hide spawn button
+		if (m_BoufbowlPlayer)
+		{
+			UE_LOG(LogTemp, Log, TEXT("ABoufbowlCell::CreateCellUI hidding spawn button"));
+			m_CellUI->m_SpawnButton->SetVisibility(ESlateVisibility::Hidden);
+		}
+
+		// Hide attack button
+		if (!m_BoufbowlPlayer || !local_player_controller->GetSavedCell() || (ennemy_player_controller && (ennemy_player_controller == local_player_controller)) )
+		{
+			UE_LOG(LogTemp, Log, TEXT("ABoufbowlCell::CreateCellUI hidding attack button"));
+			m_CellUI->m_AttackButton->SetVisibility(ESlateVisibility::Hidden);
+		}
+
+		// Set info pannel
+		if (m_BoufbowlPlayer)
+		{
+			m_CellUI->m_InfoPanel->SetText(FText::AsNumber(m_BoufbowlPlayer->GetHealth()));
+		}
+	}
 }
 
 void ABoufbowlCell::DestroyCellUI()

@@ -27,8 +27,11 @@ public:
 	void SetGrid(ABoufbowlGrid* boufbowl_grid);
 
 	ABoufbowlCell* GetSelectedCell();
+	ABoufbowlCell* GetSavedCell();
 
 	void MoveSavedPlayerToSelectedCell();
+	void AttackEnnemyWithSavedPlayer();
+
 protected:
 	ABoufbowlGrid* m_BoufbowlGrid;
 	ABoufbowlCell* m_SelectedCell;
@@ -63,8 +66,6 @@ protected:
 	virtual void PlayerTick(float DeltaTime) override;
 	virtual void SetupInputComponent() override;
 	// End PlayerController interface
-
-	void SpawnPlayerSelectedCell();
 
 	void LeftMouseButtonClick();
 	void RightMouseButtonClick();

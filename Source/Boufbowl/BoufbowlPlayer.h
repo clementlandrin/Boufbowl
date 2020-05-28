@@ -30,12 +30,20 @@ public:
 	ABoufbowlPlayerController* GetOwnerController();
 
 	void PlayRunAnimation();
+	void PlayDamageAnimation();
+
+	void TakeDamage(uint8 damage_amount);
 
 	static ABoufbowlPlayer* SpawnPlayer(FString mesh_path, ABoufbowlCell* cell, ABoufbowlPlayerController* owner_controller);
+
+	uint8 GetHealth();
 private:
 	ABoufbowlPlayerController* m_OwnerController;
 	USkeletalMeshComponent* m_MeshComponent;
 	AAIController* m_AIController;
 	UAnimSequence* m_RunSequence;
+	UAnimSequence* m_DamageSequence;
+	
+	uint8 m_Health = 2;
 };
 

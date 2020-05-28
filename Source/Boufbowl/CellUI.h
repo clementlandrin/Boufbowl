@@ -4,6 +4,7 @@
 #include "CellUI.generated.h"
 
 class UButton;
+class UTextBlock;
 class ABoufbowlCell;
 
 // We make the class abstract, as we don't want to create
@@ -19,12 +20,14 @@ public:
 	UPROPERTY(meta = (BindWidget)) UButton* m_MoveButton;
 	UPROPERTY(meta = (BindWidget)) UButton* m_AttackButton;
 	UPROPERTY(meta = (BindWidget)) UButton* m_BallButton;
+	UPROPERTY(meta = (BindWidget)) UButton* m_InfoButton;
+	UPROPERTY(meta = (BindWidget)) UTextBlock* m_InfoPanel;
 
 	UFUNCTION() void OnClickSpawnButton();
 	UFUNCTION() void OnClickMoveButton();
 	UFUNCTION() void OnClickAttackButton();
 	UFUNCTION() void OnClickBallButton();
-
+	UFUNCTION() void OnClickInfoButton();
 
 	UCellUI(const FObjectInitializer& ObjectInitializer);
 
